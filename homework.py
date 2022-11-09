@@ -36,8 +36,7 @@ HOMEWORK_STATUSES = {
 
 
 def send_message(bot, message):
-    """функция отправки сообщения в телеграм чат """
-
+    """ Функция отправки сообщения в телеграм чат """
     bot = Bot(token=TELEGRAM_TOKEN)
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
@@ -47,7 +46,7 @@ def send_message(bot, message):
 
 
 def get_api_answer(current_timestamp):
-    """Ответ в формате JSON от API"""
+    """ Ответ в формате JSON от API"""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     response = requests.get(url=ENDPOINT, headers=HEADERS, params=params)
@@ -60,6 +59,7 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response):
+    """Проверка получаемого ответа от API."""
     try:
         if response.__class__.__name__ != 'dict':
             raise Exception('с сервера вернулся не список')
@@ -80,6 +80,7 @@ def check_response(response):
 
 
 def parse_status(homework):
+    """ Возвращаем статус проверяемой работы."""
     try:
         homework_name = homework['homework_name']
     except KeyError:
@@ -91,6 +92,7 @@ def parse_status(homework):
 
 
 def check_tokens():
+    """проверка переменных из окружения."""
     if all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]):
         return True
 
