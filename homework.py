@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import sys
@@ -37,16 +36,18 @@ HOMEWORK_STATUSES = {
 
 
 def send_message(bot, message):
-    """ функция отправки сообщения в телеграм чат """
+    """функция отправки сообщения в телеграм чат """
+
     bot = Bot(token=TELEGRAM_TOKEN)
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
         logger.info(f'сообщение отправлено в телеграм,{message}')
     except Exception:
-        raise TelegramMessegeError('сообщение не отправлено')
+        raise TelegramMessageError('сообщение не отправлено')
 
 
 def get_api_answer(current_timestamp):
+    """Ответ в формате JSON от API"""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     response = requests.get(url=ENDPOINT, headers=HEADERS, params=params)
@@ -99,7 +100,8 @@ def main():
     if not check_tokens():
         logger.critical('не все токены введены корректно')
     logger.debug('Старт бота')
-    current_timestamp = 0#int(time.time())
+    # current_timestamp = int(time.time())
+    current_timestamp = 1400000
     bot = Bot(token=TELEGRAM_TOKEN)
     while True:
         try:
