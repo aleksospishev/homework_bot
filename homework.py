@@ -80,7 +80,7 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """ Возвращаем статус проверяемой работы."""
+    """Возвращаем статус проверяемой работы."""
     try:
         homework_name = homework['homework_name']
     except KeyError:
