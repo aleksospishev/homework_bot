@@ -102,8 +102,7 @@ def main():
     if not check_tokens():
         logger.critical('не все токены введены корректно')
     logger.debug('Старт бота')
-    # current_timestamp = int(time.time())
-    current_timestamp = 1400000
+    current_timestamp = int(time.time())
     bot = Bot(token=TELEGRAM_TOKEN)
     while True:
         try:
