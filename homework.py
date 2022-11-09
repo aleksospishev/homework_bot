@@ -36,7 +36,7 @@ HOMEWORK_STATUSES = {
 
 
 def send_message(bot, message):
-    """ Функция отправки сообщения в телеграм чат """
+    """Функция отправки сообщения в телеграм чат."""
     bot = Bot(token=TELEGRAM_TOKEN)
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
@@ -46,7 +46,7 @@ def send_message(bot, message):
 
 
 def get_api_answer(current_timestamp):
-    """ Ответ в формате JSON от API"""
+    """Ответ в формате JSON от API."""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     response = requests.get(url=ENDPOINT, headers=HEADERS, params=params)
@@ -63,7 +63,7 @@ def check_response(response):
     try:
         if response.__class__.__name__ != 'dict':
             raise Exception('с сервера вернулся не список')
-    except Exception :
+    except Exception:
         logger.error('вернулся отличный от словаря ответ')
     try:
         if response == {}:
