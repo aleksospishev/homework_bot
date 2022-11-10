@@ -37,12 +37,11 @@ HOMEWORK_STATUSES = {
 
 def send_message(bot, message):
     """Функция отправки сообщения в телеграм чат."""
-    bot = Bot(token=TELEGRAM_TOKEN)
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
         logger.info(f'сообщение отправлено в телеграм,{message}')
-    except Exception:
-        raise TelegramMessageError('сообщение не отправлено')
+    except TelegramMessageError:
+        logger.error('сообщение не отправлено')
 
 
 def get_api_answer(current_timestamp):
@@ -55,46 +54,42 @@ def get_api_answer(current_timestamp):
         logger.error(f'YaAPI недоступен ошибка: {return_code}')
         raise Exception
     response = response.json()
-    return response
+    try:
+        return response
+    except JSONDecodeError:
+        logging.error('некорректный JSON')
 
 
 def check_response(response):
     """Проверка получаемого ответа от API."""
-    try:
-        if response.__class__.__name__ != 'dict':
-            raise Exception('с сервера вернулся не список')
-    except Exception:
-        logger.error('вернулся отличный от словаря ответ')
-    try:
-        if response == {}:
-            raise CheckResponsDictError('вернулся пустой словарь')
-    except Exception:
-        logger.error('пусто')
-    try:
-        homework = response['homeworks']
-        if homework.__class__.__name__ != 'list':
-            raise Exception('в словаре под ключом "homeworks" не список')
-    except KeyError:
-        logger.error('отсутвует ключ "homeworks"')
+    if not isinstance(response, dict):
+        raise TypeError('Вернулся отличный от словаря ответ')
+    if not response.get('homeworks'):
+        KeyError('Отсутвует ключ "homeworks"')
+    homework = response['homeworks']
+    if not isinstance(homework, list):
+        raise TypeError('В словаре под ключом "homeworks" не список')
     return homework
 
 
 def parse_status(homework):
     """Возвращаем статус проверяемой работы."""
     try:
-        homework_name = homework['homework_name']
-    except KeyError:
-        logger.error('нет ключа "homework_name" ')
-
+        name_homework = homework['homework_name']
+    except KeyError as e:
+        logger.error(f'в словаре нет ключа {e}')
+    if homework['status'] not in HOMEWORK_STATUSES:
+        raise KeyError(f'у работы неверный статус {homework["status"]}')
     homework_status = homework['status']
     verdict = HOMEWORK_STATUSES[homework_status]
-    return f'Изменился статус проверки работы "{homework_name}". {verdict}'
+
+    return f'Изменился статус проверки работы "{name_homework}". {verdict}'
+
 
 
 def check_tokens():
     """проверка переменных из окружения."""
-    if all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]):
-        return True
+    return all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID])
 
 
 def main():
@@ -108,16 +103,15 @@ def main():
         try:
             all_homework = get_api_answer(current_timestamp)
             check_homework = check_response(all_homework)
-
             if len(check_homework) > 0:
                 homework = check_homework[0]
                 send_message(bot, parse_status(homework))
                 current_timestamp = all_homework['current_date']
-            time.sleep(RETRY_TIME)
         except Exception as e:
             logger.error(f'Бот упал с ошибкой {e}')
             send_message(bot, f'Бот упал с ошибкой: {e}')
-            time.sleep(60)
+        finally:
+            time.sleep(RETRY_TIME)
 
 
 if __name__ == '__main__':
