@@ -1,10 +1,10 @@
+import json
 import logging
 import os
 import sys
 import time
 import requests
 
-from сustomexcept import CheckResponsDictError, TelegramMessageError
 from dotenv import load_dotenv
 from telegram import Bot
 
@@ -53,10 +53,10 @@ def get_api_answer(current_timestamp):
         return_code = response.status_code
         logger.error(f'YaAPI недоступен ошибка: {return_code}')
         raise Exception
-    response = response.json()
     try:
+        response = response.json()
         return response
-    except JSONDecodeError:
+    except json.JSONDecodeError:
         logging.error('некорректный JSON')
 
 
@@ -84,7 +84,6 @@ def parse_status(homework):
     verdict = HOMEWORK_STATUSES[homework_status]
 
     return f'Изменился статус проверки работы "{name_homework}". {verdict}'
-
 
 
 def check_tokens():
