@@ -5,6 +5,7 @@ import sys
 import time
 import requests
 
+from сustomexcept import TelegramMessageError
 from dotenv import load_dotenv
 from telegram import Bot
 
